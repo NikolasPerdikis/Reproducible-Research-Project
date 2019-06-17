@@ -6,6 +6,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
+library(tidyr)
 ```
 
 ### Download the file and read the data into a structure (item #1)
@@ -24,15 +25,13 @@ tbl1 <- read.table("activity.csv",sep=",",na.strings="NA",skip=1,col.names=c("St
 dim(tbl1)
 head(tbl1)
 str(tbl1)
-pnull <- sum(is.na(tbl1$Steps))
-```
 
-Note: There is a total of `r pnull` NULL values in the dataset
+```
 
 Next step: Generate the first aggregate
 
 ```{r}
-per_day <- tbl1 %>% group_by(Date) %>% summarise(tot_step = sum(Steps))
+per_day <- tbl1 %>% group_by(Date) %>% summarise(tot_step = sum(Steps,na.rm=TRUE))
 head(per_day)
 dim(per_day)
 
@@ -47,4 +46,65 @@ median_steps <- median(per_day$tot_step,na.rm=TRUE)
 Print out the Average and the Median (item #3)
 
 The Median steps per day is `r median_steps` and the average steps per day is `r avg_steps`
+
+For the time series plot, we need to calculate the average number of steps taken in each 5-minute interval, across all days (item #4)
+
+```{r}
+
+ave_int <- tbl1 %>% group_by(Interval) %>% summarise(int_steps = sum(Steps,na.rm=TRUE))
+dim(ave_int)
+head(ave_int)
+write.csv(ave_int,"ave_int.csv")
+# Divide the sum of steps in each interval by the number of days to get the average
+ave_int$int_steps = ave_int$int_steps/nrow(per_day)
+max(ave_int$int_steps)
+
+plot(ave_int$Interval,
+     ave_int$int_steps,
+     type="l",
+     col="grey",
+     xlim=c(0,2400),
+     ylim=c(0,200),
+     xlab="Hour in HH24MM format",
+     ylab="Number of steps within the Interval",
+     main="Number of Steps inside Each Interval, Averaged across All Days"
+     )
+
+ticks = c(0000, 0800, 0900,1000, 1200,1500,1800,2000,2200)
+axis(side = 1, at = ticks)
+axis(side = 2)
+```
+
+According to the graph, the maximum activity is recorded between 8 - 9 am (item #5)
+
+Imputing missing values:
+```{r}
+pnull <- sum(is.na(tbl1$Steps))
+```
+
+Note: There is a total of `r pnull` NULL values in the dataset
+
+Using function tidyr::fill we will create a dataset that does not have NULL values
+
+```{r}
+res1 <- tbl1 %>% fill(Steps,.direction="up")
+tbl_nonull <- res1 %>% fill(Steps,.direction="down")
+
+pnull2 <- sum(is.na(tbl_nonull$Steps))
+```
+
+Now we see that the number of NULL values in the new dataset is `r pnull2`
+
+We calculate again the number of total steps per day:
+
+```{r}
+per_day_nonull <- tbl_nonull %>% group_by(Date) %>% summarise(tot_step = sum(Steps))
+```
+
+and we proceed to perform the new plot, without any missing values
+
+```{r}
+hist(x=per_day_nonull$tot_step,col="orange",xlab="Steps per Day",main="Histogram of Steps per Day (no NA values)")
+
+```
 
