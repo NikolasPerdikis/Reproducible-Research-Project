@@ -67,7 +67,7 @@ plot(ave_int$Interval,
      col="grey",
      xlim=c(0,2400),
      ylim=c(0,200),
-     xlab="Hour in HH24MM format",
+     xlab="Hour in HH24MI format",
      ylab="Number of steps within the Interval",
      main="Number of Steps inside Each Interval, Averaged across All Days"
      )
@@ -93,7 +93,6 @@ Using [function tidyr:fill](https://tidyr.tidyverse.org/reference/fill.html) we 
 ```{r}
 res1 <- tbl1 %>% fill(Steps,.direction="up")
 tbl_nonull <- res1 %>% fill(Steps,.direction="down")
-write.csv(tbl_nonull,"tbl_nonull.csv")
 pnull2 <- sum(is.na(tbl_nonull$Steps))
 ```
 
@@ -119,15 +118,24 @@ So now the new average is `r avg_steps_nonull` while initially it was `r avg_ste
 How is it possible that there is no difference? By examining the original dataset we see that NA values are always before and after zero values. This means that the function merely replaced the NA value with 0
 
 ```{r}
+# Create the factor and grouped the days into 2 categories, weekend and weekday
 tbl_nonull$Date <- as.Date(tbl_nonull$Date)
-class(tbl_nonull$Date)
-weekend1 <- c("sobota","neděle")
-#weekdays(tbl_nonull$Date)
+weekend1 <- c("sobota","neděle") # Saturday and Sunday in Czech
 tbl_nonull$Wday <- factor((weekdays(tbl_nonull$Date) %in% weekend1),levels=c(TRUE,FALSE),labels=c("weekend","weekday"))
-tbl_nonull$day <- weekdays(tbl_nonull$Date) 
-head(tbl_nonull)
-tail(tbl_nonull)
-tbl_nonull[]
-#tbl_nonull$Wday=="weekday", %in% weekend1,levels=c(TRUE,FALSE),labels=c("weekend","weekday"))
+```
 
+Now that the dataset contrains the factor, it is time to create the final aggregate, which is group intervals of all weekend and all weekdays.
+
+```{r}
+tbl_ag_wd <- tbl_nonull %>% group_by(Interval,Wday) %>% summarise(tot_steps = sum(Steps))
+
+```
+And the plot of the two panels (total steps in weekdays vs weekend)
+
+```{r}
+library(lattice)
+xyplot(tot_steps~Interval|factor(Wday),data=tbl_ag_wd,
+       main="Steps in Time Intervals of 5 min, Weekend vs Weekday",
+       xlab="Hour is HH24MI format",
+       ylab="Number of Steps")    
 ```
