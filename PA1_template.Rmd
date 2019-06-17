@@ -8,7 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 ```
 
-## Download the file and read the data into a structure
+### Download the file and read the data into a structure (item #1)
 
 ```{r}
 setwd("D:/Github/ReproducibleResearchWeek2/")
@@ -18,7 +18,7 @@ unzip("data.zip")
 tbl1 <- read.table("activity.csv",sep=",",na.strings="NA",skip=1,col.names=c("Steps","Date","Interval"))
 ```
 
-## Review the data
+### Review the data
 
 ```{r}
 dim(tbl1)
@@ -28,6 +28,7 @@ pnull <- sum(is.na(tbl1$Steps))
 ```
 
 Note: There is a total of `r pnull` NULL values in the dataset
+
 Next step: Generate the first aggregate
 
 ```{r}
@@ -37,12 +38,13 @@ dim(per_day)
 
 ```
 
-Then generate the plot and calculate median and average
+Then generate the plot and calculate median and average (item #2)
 ```{r}
 hist(x=per_day$tot_step,col="grey",xlab="Steps per Day",main="Histogram of Steps per Day")
 avg_steps <- round(sum(per_day$tot_step,na.rm=TRUE)/nrow(per_day),digits=0)
 median_steps <- median(per_day$tot_step,na.rm=TRUE)
 ```
-Print out the Average and the Median
+Print out the Average and the Median (item #3)
 
 The Median steps per day is `r median_steps` and the average steps per day is `r avg_steps`
+
