@@ -25,7 +25,7 @@ tbl1 <- read.table("activity.csv",sep=",",na.strings="NA",skip=1,col.names=c("St
 dim(tbl1)
 head(tbl1)
 str(tbl1)
-
+write.csv(tbl1,"tbl1.csv")
 ```
 
 Next step: Generate the first aggregate
@@ -35,7 +35,9 @@ per_day <- tbl1 %>% group_by(Date) %>% summarise(tot_step = sum(Steps,na.rm=TRUE
 head(per_day)
 dim(per_day)
 
+sum(per_day$tot_step,na.rm=TRUE)
 ```
+
 
 Then generate the plot and calculate median and average (item #2)
 ```{r}
@@ -84,12 +86,14 @@ pnull <- sum(is.na(tbl1$Steps))
 
 Note: There is a total of `r pnull` NULL values in the dataset
 
-Using function tidyr::fill we will create a dataset that does not have NULL values
+Using [function tidyr:fill](https://tidyr.tidyverse.org/reference/fill.html) we will create a dataset that does not have NULL values (item #6)  
+
+**Note**: we run the function twice. The first time, the value for the NULL interval will inherit the value   of the previous time interval. The second pass, (since the first pass left some NULL values) will work the opposite way, and fill the missing values with the ones coming after them.
 
 ```{r}
 res1 <- tbl1 %>% fill(Steps,.direction="up")
 tbl_nonull <- res1 %>% fill(Steps,.direction="down")
-
+write.csv(tbl_nonull,"tbl_nonull.csv")
 pnull2 <- sum(is.na(tbl_nonull$Steps))
 ```
 
@@ -99,12 +103,31 @@ We calculate again the number of total steps per day:
 
 ```{r}
 per_day_nonull <- tbl_nonull %>% group_by(Date) %>% summarise(tot_step = sum(Steps))
+sum(per_day_nonull$tot_step,na.rm=TRUE)
 ```
 
-and we proceed to perform the new plot, without any missing values
+and we proceed to perform the new plot, without any missing values (item #7) 
 
 ```{r}
 hist(x=per_day_nonull$tot_step,col="orange",xlab="Steps per Day",main="Histogram of Steps per Day (no NA values)")
-
+avg_steps_nonull <- round(sum(per_day_nonull$tot_step)/nrow(per_day),digits=0)
+median_steps_nonull <- median(per_day_nonull$tot_step)
 ```
 
+So now the new average is `r avg_steps_nonull` while initially it was `r avg_steps` and for the median we have new value `r median_steps_nonull` as opposed to the original one `r median_steps`. 
+
+How is it possible that there is no difference? By examining the original dataset we see that NA values are always before and after zero values. This means that the function merely replaced the NA value with 0
+
+```{r}
+tbl_nonull$Date <- as.Date(tbl_nonull$Date)
+class(tbl_nonull$Date)
+weekend1 <- c("sobota","neděle")
+#weekdays(tbl_nonull$Date)
+tbl_nonull$Wday <- factor((weekdays(tbl_nonull$Date) %in% weekend1),levels=c(TRUE,FALSE),labels=c("weekend","weekday"))
+tbl_nonull$day <- weekdays(tbl_nonull$Date) 
+head(tbl_nonull)
+tail(tbl_nonull)
+tbl_nonull[]
+#tbl_nonull$Wday=="weekday", %in% weekend1,levels=c(TRUE,FALSE),labels=c("weekend","weekday"))
+
+```
