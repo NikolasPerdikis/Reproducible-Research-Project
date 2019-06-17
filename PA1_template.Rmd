@@ -1,0 +1,48 @@
+---
+title: "Reproducible Research Week 2 Assignment - Nikolaos Perdikis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+## Download the file and read the data into a structure
+
+```{r}
+setwd("D:/Github/ReproducibleResearchWeek2/")
+fileURL <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+download.file(fileURL,"data.zip")
+unzip("data.zip")
+tbl1 <- read.table("activity.csv",sep=",",na.strings="NA",skip=1,col.names=c("Steps","Date","Interval"))
+```
+
+## Review the data
+
+```{r}
+dim(tbl1)
+head(tbl1)
+str(tbl1)
+pnull <- sum(is.na(tbl1$Steps))
+```
+
+Note: There is a total of `r pnull` NULL values in the dataset
+Next step: Generate the first aggregate
+
+```{r}
+per_day <- tbl1 %>% group_by(Date) %>% summarise(tot_step = sum(Steps))
+head(per_day)
+dim(per_day)
+
+```
+
+Then generate the plot and calculate median and average
+```{r}
+hist(x=per_day$tot_step,col="grey",xlab="Steps per Day",main="Histogram of Steps per Day")
+avg_steps <- round(sum(per_day$tot_step,na.rm=TRUE)/nrow(per_day),digits=0)
+median_steps <- median(per_day$tot_step,na.rm=TRUE)
+```
+Print out the Average and the Median
+
+The Median steps per day is `r median_steps` and the average steps per day is `r avg_steps`
