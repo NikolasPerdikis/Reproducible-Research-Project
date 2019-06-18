@@ -25,16 +25,13 @@ tbl1 <- read.table("activity.csv",sep=",",na.strings="NA",skip=1,col.names=c("St
 dim(tbl1)
 head(tbl1)
 str(tbl1)
-write.csv(tbl1,"tbl1.csv")
 ```
 
 Next step: Generate the first aggregate
 
 ```{r}
 per_day <- tbl1 %>% group_by(Date) %>% summarise(tot_step = sum(Steps,na.rm=TRUE))
-head(per_day)
 dim(per_day)
-
 sum(per_day$tot_step,na.rm=TRUE)
 ```
 
@@ -55,10 +52,11 @@ For the time series plot, we need to calculate the average number of steps taken
 
 ave_int <- tbl1 %>% group_by(Interval) %>% summarise(int_steps = sum(Steps,na.rm=TRUE))
 dim(ave_int)
-head(ave_int)
-write.csv(ave_int,"ave_int.csv")
+#head(ave_int)
+#write.csv(ave_int,"ave_int.csv")
 # Divide the sum of steps in each interval by the number of days to get the average
 ave_int$int_steps = ave_int$int_steps/nrow(per_day)
+# Find the max number of steps found in an interval to adjust the axis of the plot
 max(ave_int$int_steps)
 
 plot(ave_int$Interval,
@@ -71,13 +69,13 @@ plot(ave_int$Interval,
      ylab="Number of steps within the Interval",
      main="Number of Steps inside Each Interval, Averaged across All Days"
      )
-
+# Add custom ticks to demonstrate activity variations during the day
 ticks = c(0000, 0800, 0900,1000, 1200,1500,1800,2000,2200)
 axis(side = 1, at = ticks)
 axis(side = 2)
 ```
 
-According to the graph, the maximum activity is recorded between 8 - 9 am (item #5)
+**According to the graph, the maximum activity is recorded between 8 - 9 am (item #5)**
 
 Imputing missing values:
 ```{r}
@@ -86,7 +84,7 @@ pnull <- sum(is.na(tbl1$Steps))
 
 Note: There is a total of `r pnull` NULL values in the dataset
 
-Using [function tidyr:fill](https://tidyr.tidyverse.org/reference/fill.html) we will create a dataset that does not have NULL values (item #6)  
+Using [function tidyr::fill](https://tidyr.tidyverse.org/reference/fill.html) we will create a dataset that does not have NULL values (item #6)  
 
 **Note**: we run the function twice. The first time, the value for the NULL interval will inherit the value   of the previous time interval. The second pass, (since the first pass left some NULL values) will work the opposite way, and fill the missing values with the ones coming after them.
 
@@ -102,7 +100,7 @@ We calculate again the number of total steps per day:
 
 ```{r}
 per_day_nonull <- tbl_nonull %>% group_by(Date) %>% summarise(tot_step = sum(Steps))
-sum(per_day_nonull$tot_step,na.rm=TRUE)
+#sum(per_day_nonull$tot_step,na.rm=TRUE)
 ```
 
 and we proceed to perform the new plot, without any missing values (item #7) 
