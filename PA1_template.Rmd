@@ -121,7 +121,9 @@ How is it possible that there is no difference? By examining the original datase
 # Create the factor and grouped the days into 2 categories, weekend and weekday
 tbl_nonull$Date <- as.Date(tbl_nonull$Date)
 weekend1 <- c("sobota","neděle") # Saturday and Sunday in Czech
-tbl_nonull$Wday <- factor((weekdays(tbl_nonull$Date) %in% weekend1),levels=c(TRUE,FALSE),labels=c("weekend","weekday"))
+tbl_nonull$Wday <- factor((weekdays(tbl_nonull$Date) %in% weekend1),
+                          levels=c(TRUE,FALSE),
+                          labels=c("weekend","weekday"))
 ```
 
 Now that the dataset contrains the factor, it is time to create the final aggregate, which is group intervals of all weekend and all weekdays.

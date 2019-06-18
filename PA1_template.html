@@ -465,7 +465,9 @@ median_steps_nonull &lt;- median(per_day_nonull$tot_step)</code></pre>
 <pre class="r"><code># Create the factor and grouped the days into 2 categories, weekend and weekday
 tbl_nonull$Date &lt;- as.Date(tbl_nonull$Date)
 weekend1 &lt;- c(&quot;sobota&quot;,&quot;neděle&quot;) # Saturday and Sunday in Czech
-tbl_nonull$Wday &lt;- factor((weekdays(tbl_nonull$Date) %in% weekend1),levels=c(TRUE,FALSE),labels=c(&quot;weekend&quot;,&quot;weekday&quot;))</code></pre>
+tbl_nonull$Wday &lt;- factor((weekdays(tbl_nonull$Date) %in% weekend1),
+                          levels=c(TRUE,FALSE),
+                          labels=c(&quot;weekend&quot;,&quot;weekday&quot;))</code></pre>
 <p>Now that the dataset contrains the factor, it is time to create the final aggregate, which is group intervals of all weekend and all weekdays.</p>
 <pre class="r"><code>tbl_ag_wd &lt;- tbl_nonull %&gt;% group_by(Interval,Wday) %&gt;% summarise(tot_steps = sum(Steps))</code></pre>
 <p>And the plot of the two panels (total steps in weekdays vs weekend)</p>
